@@ -1,0 +1,48 @@
+﻿<svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Book Chuck Notis BCN Logo Option 1 — White</title>
+  <desc id="desc">Bold geometric BCN monogram in white and amber with Book Chuck Notis wordmark beneath.</desc>
+
+  <defs>
+    <style>
+      .charcoal { fill: #FFFFFF; }
+      .amber { fill: #E8820C; }
+      .wordmark { fill: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-weight: 800; font-size: 43px; letter-spacing: 17px; }
+    </style>
+  </defs>
+
+  <!-- BCN monogram -->
+  <g transform="translate(82 72)">
+    <!-- B outer block -->
+    <path class="charcoal" d="M0 0H260C295 0 320 25 320 60V105C320 128 307 146 286 156C313 166 330 188 330 218V270C330 309 301 338 262 338H0V0Z"/>
+    <!-- B counters -->
+    <rect x="88" y="64" width="122" height="61" rx="12" fill="#2B2B2B"/>
+    <rect x="88" y="203" width="132" height="67" rx="12" fill="#2B2B2B"/>
+
+    <!-- Simple scheduling grid cut into lower-left of B -->
+    <rect x="0" y="207" width="40" height="40" fill="#2B2B2B"/>
+    <rect x="52" y="207" width="40" height="40" fill="#2B2B2B"/>
+    <rect x="104" y="207" width="40" height="40" fill="#2B2B2B"/>
+    <rect x="0" y="260" width="40" height="40" fill="#2B2B2B"/>
+    <rect x="52" y="260" width="40" height="40" fill="#2B2B2B"/>
+    <rect x="104" y="260" width="40" height="40" fill="#2B2B2B"/>
+
+    <!-- Amber grid insert -->
+    <rect x="0" y="207" width="31" height="31" class="amber"/>
+    <rect x="52" y="207" width="31" height="31" class="amber"/>
+    <rect x="104" y="207" width="31" height="31" class="amber"/>
+    <rect x="0" y="260" width="31" height="31" class="amber"/>
+    <rect x="52" y="260" width="31" height="31" class="amber"/>
+    <rect x="104" y="260" width="31" height="31" class="amber"/>
+
+    <!-- C block -->
+    <path class="amber" d="M376 0H640L604 80H472C446 80 428 98 428 124V214C428 240 446 258 472 258H604L640 338H376C344 338 320 314 320 282V56C320 24 344 0 376 0Z"/>
+    <!-- creates open C interior -->
+    <rect x="475" y="113" width="145" height="112" fill="#2B2B2B"/>
+
+    <!-- N block -->
+    <path class="charcoal" d="M686 0H775L925 202V0H1018V338H929L779 136V338H686V0Z"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text class="wordmark" x="600" y="462" text-anchor="middle">BOOK CHUCK NOTIS</text>
+</svg>
