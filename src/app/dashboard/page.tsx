@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { formatCurrency } from '@/lib/hmrc'
 import { JOB_STATUS_STYLES } from '@/lib/utils'
 import { Briefcase, CalendarDays, PoundSterling, Bell, ChevronRight } from 'lucide-react'
-import { format, parseISO, isAfter, subDays } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -24,15 +24,27 @@ export default async function DashboardPage() {
     .order('assigned_at', { ascending: false })
     .limit(5)
 
-  // Upcoming jobs (next 14 days)
+  // All upcoming confirmed jobs
   const today = new Date().toISOString().split('T')[0]
-  const twoWeeksOut = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
 
-  const assignmentsQuery = isAdmin
-    ? supabase.from('jobs').select('*, job_assignments(count)').gte('start_date', today).lte('start_date', twoWeeksOut).neq('status', 'cancelled').order('start_date').limit(5)
-    : supabase.from('job_assignments').select('*, job:jobs(*)').eq('crew_id', user.id).eq('status', 'accepted').gte('job.start_date', today).order('job(start_date)').limit(5)
-
-  const { data: upcomingData } = await assignmentsQuery
+  let upcomingCount = 0
+  if (isAdmin) {
+    const { count } = await supabase
+      .from('jobs')
+      .select('*', { count: 'exact', head: true })
+      .gte('start_date', today)
+      .eq('status', 'confirmed')
+    upcomingCount = count || 0
+  } else {
+    const { data: acceptedAssignments } = await supabase
+      .from('job_assignments')
+      .select('job:jobs(start_date, status)')
+      .eq('crew_id', user.id)
+      .eq('status', 'accepted')
+    upcomingCount = (acceptedAssignments || []).filter(
+      (a: any) => a.job?.start_date >= today && a.job?.status !== 'cancelled'
+    ).length
+  }
 
   // Earnings this month (crew only)
   let monthEarnings = 0
@@ -85,9 +97,9 @@ export default async function DashboardPage() {
         <div className="card p-4">
           <div className="flex items-center gap-2 text-gray-500 text-xs mb-2">
             <CalendarDays size={14} className="text-[#E8820C]" />
-            Upcoming (14 days)
+            Upcoming Confirmed
           </div>
-          <div className="text-3xl font-bold text-[#2B2B2B]">{upcomingData?.length ?? 0}</div>
+          <div className="text-3xl font-bold text-[#2B2B2B]">{upcomingCount}</div>
           <Link href="/dashboard/schedule" className="text-xs text-[#E8820C] hover:underline mt-1 block">View schedule →</Link>
         </div>
 

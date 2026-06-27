@@ -23,32 +23,40 @@ export default function EarningsPage() {
 
   const supabase = createClient()
 
+  // Runs once: load profile and (for admins) crew list, then set initial selectedCrew
   useEffect(() => {
-    async function load() {
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(prof)
 
       const isAdmin = prof?.role === 'owner' || prof?.role === 'admin'
-
       if (isAdmin) {
         const { data: crew } = await supabase.from('profiles').select('*').eq('role', 'crew').order('full_name')
         setCrewList(crew || [])
+        setSelectedCrew(crew?.[0]?.id || '')
+      } else {
         setSelectedCrew(user.id)
       }
+    }
+    init()
+  }, [])
 
-      const targetId = isAdmin ? user.id : user.id
+  // Runs whenever the selected crew member changes
+  useEffect(() => {
+    if (!selectedCrew) return
+    async function fetchEarnings() {
+      setLoading(true)
       const { data } = await supabase
         .from('job_assignments')
         .select('*, job:jobs(*)')
-        .eq('crew_id', isAdmin && selectedCrew ? selectedCrew : user.id)
+        .eq('crew_id', selectedCrew)
         .eq('status', 'accepted')
-
       setEntries((data as EarningEntry[])?.filter(e => e.job) || [])
       setLoading(false)
     }
-    load()
+    fetchEarnings()
   }, [selectedCrew])
 
   // Filter by tax year (Apr 6 – Apr 5)
@@ -73,7 +81,7 @@ export default function EarningsPage() {
     .filter(e => e.job.status !== 'completed' && e.job.status !== 'cancelled')
     .reduce((sum, e) => sum + calcJobEarnings(e), 0)
 
-  const hmrc = calculateHMRC(grossIncome)
+  const hmrc = calculateHMRC(grossIncome + pendingIncome)
 
   const isAdmin = profile?.role === 'owner' || profile?.role === 'admin'
 
@@ -130,7 +138,7 @@ export default function EarningsPage() {
             </div>
             <div className="card p-4">
               <div className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                <Calculator size={12} /> Est. Take-Home
+                <Calculator size={12} /> Projected Take-Home
               </div>
               <div className="text-2xl font-bold text-[#2B2B2B]">{formatCurrency(hmrc.takeHome)}</div>
             </div>
@@ -138,7 +146,7 @@ export default function EarningsPage() {
 
           {/* HMRC estimate */}
           <div className="mb-6">
-            <TaxEstimate estimate={hmrc} taxYear={taxYear} />
+            <TaxEstimate estimate={hmrc} taxYear={taxYear} pendingIncome={pendingIncome} />
           </div>
 
           {/* Job breakdown */}

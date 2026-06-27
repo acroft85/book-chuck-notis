@@ -24,6 +24,7 @@ export default function ScheduleBoard({ currentUser }: { currentUser: Profile })
   const fetchData = useCallback(async () => {
     const supabase = createClient()
     setLoading(true)
+    const currentWeekEnd = addDays(weekStart, 6)
 
     const crewQ = isAdminOrOwner
       ? supabase.from('profiles').select('*').eq('role', 'crew').order('full_name')
@@ -43,12 +44,12 @@ export default function ScheduleBoard({ currentUser }: { currentUser: Profile })
         if (!a.job) return false
         const s = parseISO(a.job.start_date)
         const e = parseISO(a.job.end_date)
-        return s <= weekEnd && e >= weekStart
+        return s <= currentWeekEnd && e >= weekStart
       })
       setAssignments(filtered)
     }
     setLoading(false)
-  }, [weekStart, weekEnd, isAdminOrOwner, currentUser.id])
+  }, [weekStart, isAdminOrOwner, currentUser.id])
 
   useEffect(() => { fetchData() }, [fetchData])
 
