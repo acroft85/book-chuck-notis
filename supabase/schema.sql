@@ -213,12 +213,6 @@ CREATE POLICY "assignments_crew_select" ON job_assignments FOR SELECT
   USING (crew_id = auth.uid());
 CREATE POLICY "assignments_crew_respond" ON job_assignments FOR UPDATE
   USING (crew_id = auth.uid());
--- Public availability calendar: allows counting crew on confirmed jobs
-CREATE POLICY "assignments_public_availability" ON job_assignments FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM jobs WHERE id = job_id AND status IN ('confirmed', 'in_progress')
-  ));
-
 -- Messages (only assigned crew + admin/owner)
 CREATE POLICY "messages_admin_all" ON messages FOR ALL
   USING (get_user_role(auth.uid()) IN ('owner','admin'));
