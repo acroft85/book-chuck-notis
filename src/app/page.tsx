@@ -25,7 +25,7 @@ export default async function PublicPage() {
   threeMonthsOut.setMonth(threeMonthsOut.getMonth() + 3)
   const { data: confirmedJobs } = await supabase
     .from('jobs')
-    .select('start_date, end_date, job_assignments(count)')
+    .select('start_date, end_date')
     .in('status', ['confirmed', 'in_progress'])
     .gte('end_date', today)
     .lte('start_date', threeMonthsOut.toISOString().split('T')[0])
@@ -33,7 +33,6 @@ export default async function PublicPage() {
   const busyPeriods = (confirmedJobs || []).map((j: any) => ({
     start_date: j.start_date as string,
     end_date:   j.end_date as string,
-    assigned_count: (j.job_assignments as { count: number }[])?.[0]?.count ?? 0,
   }))
 
   return (

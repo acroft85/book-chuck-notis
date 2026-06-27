@@ -8,7 +8,6 @@ import {
 export type BusyPeriod = {
   start_date: string
   end_date: string
-  assigned_count: number
 }
 
 type DayStatus = 'available' | 'limited' | 'unavailable' | 'past'
@@ -24,11 +23,10 @@ function getDayStatus(dateStr: string, today: string, busyPeriods: BusyPeriod[],
   if (dateStr < today) return 'past'
 
   const overlapping = busyPeriods.filter(p => p.start_date <= dateStr && p.end_date >= dateStr)
-  const totalBusy = overlapping.reduce((sum, p) => sum + p.assigned_count, 0)
 
-  if (totalBusy === 0) return 'available'
-  if (totalCrew > 0 && totalBusy >= totalCrew) return 'unavailable'
-  return 'limited'
+  if (overlapping.length === 0) return 'available'
+  if (totalCrew > 0 && overlapping.length < totalCrew) return 'limited'
+  return 'unavailable'
 }
 
 const DAY_HEADERS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
