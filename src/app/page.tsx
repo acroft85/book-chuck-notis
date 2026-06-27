@@ -1,5 +1,5 @@
 ﻿import { createClient } from '@/lib/supabase/server'
-import BookingForm from '@/components/booking/BookingForm'
+import BookingSection from '@/components/booking/BookingSection'
 import type { CrewRate } from '@/lib/types'
 import { CheckCircle2, Clock, Users, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
@@ -18,6 +18,23 @@ export default async function PublicPage() {
     .eq('role', 'crew')
 
   const crewCount = crewProfiles?.length ?? 0
+
+  // Confirmed job periods for availability calendar (date ranges only — no client details)
+  const today = new Date().toISOString().split('T')[0]
+  const threeMonthsOut = new Date()
+  threeMonthsOut.setMonth(threeMonthsOut.getMonth() + 3)
+  const { data: confirmedJobs } = await supabase
+    .from('jobs')
+    .select('start_date, end_date, job_assignments(count)')
+    .in('status', ['confirmed', 'in_progress'])
+    .gte('end_date', today)
+    .lte('start_date', threeMonthsOut.toISOString().split('T')[0])
+
+  const busyPeriods = (confirmedJobs || []).map((j: any) => ({
+    start_date: j.start_date as string,
+    end_date:   j.end_date as string,
+    assigned_count: (j.job_assignments as { count: number }[])?.[0]?.count ?? 0,
+  }))
 
   return (
     <div className="min-h-screen bg-white">
@@ -102,16 +119,10 @@ export default async function PublicPage() {
         </section>
       )}
 
-      {/* Booking form */}
+      {/* Availability calendar + booking form */}
       <section id="book" className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-3xl mx-auto px-4 py-14">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-[#2B2B2B] mb-2">Request a Booking</h2>
-            <p className="text-gray-500">
-              Fill in the details below and we&apos;ll get back to you within one working day.
-            </p>
-          </div>
-          <BookingForm />
+        <div className="max-w-4xl mx-auto px-4 py-14">
+          <BookingSection busyPeriods={busyPeriods} totalCrew={crewCount} />
         </div>
       </section>
 

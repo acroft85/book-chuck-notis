@@ -202,6 +202,9 @@ CREATE POLICY "jobs_crew_assigned" ON jobs FOR SELECT
   ));
 CREATE POLICY "jobs_client_own" ON jobs FOR SELECT
   USING (client_id = auth.uid());
+-- Public availability calendar: exposes only date ranges for confirmed jobs (no client details)
+CREATE POLICY "jobs_public_availability" ON jobs FOR SELECT
+  USING (status IN ('confirmed', 'in_progress'));
 
 -- Job assignments
 CREATE POLICY "assignments_admin_all" ON job_assignments FOR ALL
@@ -210,6 +213,11 @@ CREATE POLICY "assignments_crew_select" ON job_assignments FOR SELECT
   USING (crew_id = auth.uid());
 CREATE POLICY "assignments_crew_respond" ON job_assignments FOR UPDATE
   USING (crew_id = auth.uid());
+-- Public availability calendar: allows counting crew on confirmed jobs
+CREATE POLICY "assignments_public_availability" ON job_assignments FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM jobs WHERE id = job_id AND status IN ('confirmed', 'in_progress')
+  ));
 
 -- Messages (only assigned crew + admin/owner)
 CREATE POLICY "messages_admin_all" ON messages FOR ALL

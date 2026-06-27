@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
 
@@ -19,8 +19,14 @@ const BLANK = {
   accepted_cancellation_policy: false,
 }
 
-export default function BookingForm() {
-  const [form, setForm] = useState(BLANK)
+export default function BookingForm({ initialStartDate = '' }: { initialStartDate?: string }) {
+  const [form, setForm] = useState({ ...BLANK, start_date: initialStartDate })
+
+  useEffect(() => {
+    if (initialStartDate) {
+      setForm(f => ({ ...f, start_date: initialStartDate }))
+    }
+  }, [initialStartDate])
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
